@@ -1,0 +1,75 @@
+version: '3.8'
+
+services:
+
+  #------ RabbitMQ ----------------------------------------------------------------------------
+  rabbitmq:
+    image: rabbitmq: 3.12-management-alpine
+    container_name: rabbitmq
+    ports: 
+      - "5672:5672"   #AMQP protocol port 
+      - "15672:15672" #Management UI
+    environment:
+      - RABBITMQ_DEFAULT_USER: guest
+      - RABBITMQ_DEFAULT_PASS: guest
+    volumes: 
+      - rabbitmq_data:/var/lib/rabbitmq
+    healthcheck:
+      test: ["CMD", "rabbitmq-diagnostics", "ping"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 30s
+
+  #------ Zookeeper ----------------------------------------------------------------------------
+  zookeeper:
+    image: confluentinc/cp-zookeeper: 7.5.0
+    container_name: zookeeper
+    environment:
+      - ZOOKEEPER_CLIENT_PORT: 2181
+      - ZOOKEEPER_TICK_TIME: 2000
+    volumes:
+    - zookeeper_data:/var/lib/zookeeper
+
+  #------ Kafka --------------------------------------------------------------------------------
+  kafka: 
+    image: confluentic/cp-kafka: 7.5.0
+    container_name: kafka
+    depends_on:
+      - zookeeper
+    ports:
+      - "9082:9082"
+    environment:
+      - KAFKA_BROKER_ID: 1
+      - KAFKA_ZOOKEEPER_CONNECT: zookeeper:2181
+      KAFKA_LISTENER_SECURITY_PROTOCOL_MAP: PLAINTEXT_INTERNAL:PLAINTEXT,PLAINTEXT_EXTERNAL:PLAINTEXT
+      KAFKA_ADVERTISED_LISTENERS: PLAINTEXT_INTERNAL://kafka:29092,PLAINTEXT_EXTERNAL://localhost:9092
+      KAFKA_INTER_BROKER_LISTENER_NAME: PLAINTEXT_INTERNAL
+      KAFKA_OFFSETS_TOPIC_REPLICATION_FACTOR: 1
+      KAFKA_TRANSACTION_STATE_LOG_REPLICATION_FACTOR: 1
+      KAFKA_TRANSACTION_STATE_LOG_MIN_ISR: 1
+ 
+      KAFKA_AUTO_CREATE_TOPICS_ENABLE: "true"
+    volumes:
+      - kafka_data:/var/lib/kafka
+    healthcheck:
+      test: ["CMD", "kafka-broker-api-versions", "--bootstrap-server", "localhost:9092"]
+      interval: 10s
+      timeout: 10s
+      retries: 10
+ 
+  kafka-ui:
+    image: provectuslabs/kafka-ui:latest
+    container_name: kafka-ui
+    depends_on:
+      - kafka
+    ports:
+      - "8080:8080" 
+    environment:
+      KAFKA_CLUSTERS_0_NAME: local
+      KAFKA_CLUSTERS_0_BOOTSTRAPSERVERS: kafka:29092
+ 
+volumes:
+  rabbitmq_data:
+  zookeeper_data:
+  kafka_data:
