@@ -19,3 +19,5 @@ Thumbs.db
 # Editor configs (optional — some teams commit these)
 .vscode/
 .idea/
+
+.test/
