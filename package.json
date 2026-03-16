@@ -1,5 +1,23 @@
 {
+  "name": "messaging-demo",
+  "version": "1.0.0",
+  "description": "Kafka and RabbitMQ demo with order processing",
+  "scripts": {
+    "kafka:producer": "ts-node kafka/producer.ts",
+    "kafka:consumer": "ts-node kafka/consumer.ts",
+    "rabbit:producer": "ts-node rabbitmq/producer.ts",
+    "rabbit:consumer": "ts-node rabbitmq/consumer.ts"
+  },
   "dependencies": {
+    "amqplib": "^0.10.3",
+    "docker": "^1.0.0",
+    "docker-compose": "^1.3.2",
     "kafkajs": "^2.2.4"
+  },
+  "devDependencies": {
+    "@types/amqplib": "^0.10.4",
+    "@types/node": "^20.0.0",
+    "ts-node": "^10.9.2",
+    "typescript": "^5.3.0"
   }
 }

@@ -1,4 +1,5 @@
 import { Kafka, logLevel, Partitioners, Producer } from "kafkajs";
+import { createSampleOrder, Order } from "../shared/types";
 
 const kafka = new Kafka({
   clientId: "order-service-producer",
